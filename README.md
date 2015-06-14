@@ -1,58 +1,67 @@
-=Attachment on the Fly
+#Attachment on the Fly
 
 Attachment on the Fly is a module that extends Paperclip by allowing dynamic
 image resizing without going through ActiveRecord first.  This gem can only
 resize images.  If you try to resize a PDF or other attachment, nothing will
 happen.
 
-==Requirements
+##Requirements
 
 * thoughtbot-paperclip gem
 * ImageMagick
 
-==Quick Start
+##Quick Start
 
-gem install attachment_on_the_fly
+`gem install attachment_on_the_fly`
 
-Setup your models the same way you normally do with Paperclip.  See
-http://github.com/thoughtbot/paperclip for detailed instructions.
+Setup your models the same way you normally do with Paperclip. Refer to
+[Paperclip gem page](http://github.com/thoughtbot/paperclip) for detailed instructions.
 
 Once your attachments are working with Paperclip, add this line to the top of
 your models:
 
-require "attachment_on_the_fly"
+`require "attachment_on_the_fly"`
 
 To use, reference the instance of your attachment like this:
 
-<%= my_image_model.attachment.s_640_480 %>
+`<%= my_image_model.attachment.s_640_480 %>`
 
 This will output an image path based on your url interpolation and a resized
 image named S_640_480_your_image_name.jpg (or gif or png).
 
-==Usage
+##Usage
 
 Attachment on the Fly can accept three types of inputs: width by height, height
 proportional, and width proportional.
 
-my_image_model.attachment.s_640_480 will generate a 640x480 pixel image.
+```
+my_image_model.attachment.s_640_480
+# will generate a 640x480 pixel image.
 
-my_image_model.attachment.s_640_width will generate an image that is 640 pixels
-wide and proportionally high based on the original image dimensions.
+my_image_model.attachment.s_640_width
+# will generate an image that is 640 pixels wide and
+# proportionally high based on the original image dimensions.
 
-my_image_model.attachment.s_480_height will generate an image that is 480 pixels
-high and proportionally wide based on the original image dimensions.
+my_image_model.attachment.s_480_height
+# will generate an image that is 480 pixels high and
+# proportionally wide based on the original image dimensions.
+```
 
-== Parameters options
+## Parameters options
 
-Attachment-on-the-fly uses 'Convert' from image-magick to resize image and
+Attachment-on-the-fly uses [Convert](http://www.imagemagick.org/script/convert.php) from image-magick to resize image and
 you can pass any convert options in hash notation.
-my_image_model.attachment.s_800_600 :morph => 15
 
-link:http://www.imagemagick.org/script/command-line-options.php
+`my_image_model.attachment.s_800_600 :morph => 15`
 
-The only exception is :extension parameter
-my_image_model.attachment.s_400_300 :quality => 75, :extension => 'jpg' will generate
-an image that is 400x300 with quality 75% and convert jpg if necessary.
+List of available convertation options can be found [here](http://www.imagemagick.org/script/command-line-options.php).
+
+The only exception is `:extension` parameter
+
+```
+my_image_model.attachment.s_400_300 :quality => 75, :extension => 'jpg'
+# will generate an image that is 400x300 with quality 75% and convert jpg if necessary.
+````
 
 Note that the extension parameter will not trigger conversion to a different file type
 if the original file has an alpha channel (in order to avoid problems with, for example,
@@ -70,7 +79,7 @@ or any other of convert's command line options, you will need to do so in the
 final lines of lib/attachment_on_the_fly.rb.  We are working on a feature to do
 this dynamically, but it is not available yet.
 
-== Paperclip options
+## Paperclip options
 
 Attachment-on-the-fly refers to the following optional entries in Paperclip.options:
 
@@ -82,19 +91,15 @@ Attachment-on-the-fly refers to the following optional entries in Paperclip.opti
 * version_prefix (inserted in name of generated files)
 * whiny (boolean, if true, raises an error when original file is missing instead of serving up image from missing_image_path)
 
-Example: Paperclip.options[:whiny] = true
+Example: `Paperclip.options[:whiny] = true`
 
-== S3 integration
+## S3 integration
 
-S3 integration is tested with aws-sdk of version < 2.0. It is not guaranteed to work flawlessly with latter versions.
+S3 integration is tested with `aws-sdk` of version < 2.0. It is not guaranteed to work flawlessly with latter versions.
+In case there is no original image stored locally, that image is going to be downloaded from S3, converted and uploaded back.
+User receives image link hosted at S3. Next time anybody askes for the same image size, he'll get this link immediately.
 
-Here is an overview of how it works:
-1. the desired-dimensioned image is looked up in S3 bucket (specified by your paperclip relation options)
-2. in case there is already an image ready, it simply passes url to user
-3. otherwise original file is downloaded from S3, converted to desired size and uploaded back to S3
-4. user receives image link (hosted at S3). next time anybody askes for the same image size, he'll get this link at step 2.
-
-==Contributing
+## Contributing
 
 If you find this gem useful, please post your comments, bugs, patches and
 suggestions on our Github site at http://github.com/drpentode/Attachment-on-the-Fly.

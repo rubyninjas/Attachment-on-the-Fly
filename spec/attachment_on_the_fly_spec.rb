@@ -2,7 +2,12 @@ require_relative './spec_helper'
 
 describe "Attachment on the fly mixin" do
 
-  subject { Paperclip::Attachment.new }
+  subject do
+    attachment  = Paperclip::Attachment.new
+    options     = attachment.instance_variable_get("@options") || {}
+    attachment.instance_variable_set("@options", options.merge({storage: :filesystem}))
+    attachment
+  end
 
   context "#respond_to?" do
     method_names = %w{s125 cls125 s_125_250 cls_125_250
@@ -65,7 +70,7 @@ describe "Attachment on the fly mixin" do
         it "for #{method_name}" do
           File.should_receive(:exist?).with(expected[:new]).and_return(false)
           File.should_receive(:exist?).with("//file.png").and_return(true)
-          subject.should_receive(:convert_command).with(expected[:regex])
+          subject.should_receive(:convert_file!)
           subject.send(method_name)
         end
       end
@@ -73,22 +78,22 @@ describe "Attachment on the fly mixin" do
       it "passes in parameters for quality" do
         File.should_receive(:exist?).with("/S_125_WIDTH__q_75__path.png").and_return(false)
         File.should_receive(:exist?).with("//file.png").and_return(true)
-        subject.should_receive(:convert_command).with(/-quality 75/)
+        subject.should_receive(:convert_file!)
         subject.s_125_width :quality => 75
       end
 
       it "passes in parameters for extension" do
         File.should_receive(:exist?).with("/S_125_WIDTH_extension_jpeg_q_75__path.jpeg").and_return(false)
         File.should_receive(:exist?).with("//file.png").and_return(true)
-        subject.should_receive(:convert_command).with(/-quality 75/)
+        subject.should_receive(:convert_file!)
         subject.should_receive(:has_alpha?).with("//file.png").and_return(false)
         subject.s_125_width(:quality => 75, :extension => "jpeg").should == "/S_125_WIDTH_extension_jpeg_q_75__path.jpeg"
       end
 
       it "preserves original extension if file has alpha channel" do
-        File.should_receive(:exist?).with("/S_125_WIDTH_extension_jpeg_q_75__path.jpeg").and_return(false)
+        File.should_receive(:exist?).with("/S_125_WIDTH_extension_jpeg_q_75__path.png").and_return(false)
         File.should_receive(:exist?).with("//file.png").and_return(true)
-        subject.should_receive(:convert_command).with(/-quality 75/)
+        subject.should_receive(:convert_file!)
         subject.should_receive(:has_alpha?).with("//file.png").and_return(true)
         subject.s_125_width(:quality => 75, :extension => "jpeg").should == "/S_125_WIDTH_extension_jpeg_q_75__path.png"
       end
@@ -96,7 +101,7 @@ describe "Attachment on the fly mixin" do
       it "passes in parameters for colorspace" do
         File.should_receive(:exist?).with("/S_125_WIDTH_colorspace_sRGB_q_100__path.png").and_return(false)
         File.should_receive(:exist?).with("//file.png").and_return(true)
-        subject.should_receive(:convert_command).with(/-colorspace sRGB/)
+        subject.should_receive(:convert_file!)
         subject.s_125_width(:colorspace => "sRGB").should == "/S_125_WIDTH_colorspace_sRGB_q_100__path.png"
       end
     end
@@ -127,7 +132,7 @@ describe "Attachment on the fly mixin" do
       expect(subject).to receive(:asked_file_exist?) { false }
       expect(subject).to receive(:original_file_exist?) { true }
       expect(subject).to receive(:download_file)
-      expect(subject).to receive(:convert_command)
+      expect(subject).to receive(:execute_command!)
       expect(subject).to receive(:upload_converted_file)
       subject.s_125_width.should == "/S_125_WIDTH__q_100__path.png"
     end
@@ -135,9 +140,8 @@ describe "Attachment on the fly mixin" do
     it "returns url instantly if resized version exists" do
       expect(subject).to receive(:asked_file_exist?).and_return(true)
       expect(subject).not_to receive(:original_file_exist?)
-      expect(subject).not_to receive(:download_file)
-      expect(subject).not_to receive(:convert_command)
-      expect(subject).not_to receive(:upload_converted_file)
+      expect(subject).not_to receive(:convert_file!)
+      expect(subject).not_to receive(:execute_command!)
       subject.s_125_width.should == "/S_125_WIDTH__q_100__path.png"
     end
   end

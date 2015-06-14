@@ -8,23 +8,38 @@ class Hash
     end
     self
   end
+
+  def slice! *keys
+    new_result = self.slice(*keys)
+    self.clear
+    self.merge!(new_result)
+  end
+
+  def slice *keys
+    self.select{|key, v| keys.include?(key)}
+  end
 end
 
 class Paperclip
   def self.options
     {}
   end
+
   def self.log msg
   end
+
   class Attachment
     def initialize
     end
+
     def path
       "/path.png"
     end
+
     def url
       "/url"
     end
+
     def original_filename
       "/file.png"
     end
