@@ -134,6 +134,8 @@ describe "Attachment on the fly mixin" do
       expect(subject).to receive(:download_file)
       expect(subject).to receive(:execute_command!)
       expect(subject).to receive(:upload_converted_file)
+      expect(File).to receive(:delete).twice
+      #expect(subject).to receive(:remove_local_files)
       subject.s_125_width.should == "/S_125_WIDTH__q_100__path.png"
     end
 

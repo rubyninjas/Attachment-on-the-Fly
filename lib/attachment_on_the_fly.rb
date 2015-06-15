@@ -39,6 +39,12 @@ Paperclip::Attachment.class_eval do
       download_file
       super
       upload_converted_file
+      remove_local_files
+    end
+
+    def remove_local_files
+      File.delete(@new_file_name)
+      File.delete(original)
     end
 
     def download_file
