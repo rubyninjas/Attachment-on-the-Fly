@@ -13,13 +13,8 @@ Gem::Specification.new do |s|
   s.date = "2013-12-05"
   s.description = "A Paperclip mix-in to allow auto-generation of resized images"
   s.email = "jefferey.sutherland@gmail.com"
-  s.extra_rdoc_files = [
-    "README",
-    "README.rdoc"
-  ]
   s.files = [
-    "README",
-    "README.rdoc",
+    "README.md",
     "Rakefile",
     "VERSION",
     "attachment_on_the_fly.gemspec",
