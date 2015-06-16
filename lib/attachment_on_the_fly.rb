@@ -50,6 +50,7 @@ Paperclip::Attachment.class_eval do
     def download_file
       uri = URI(self.url)
       response = Net::HTTP.get_response(uri)
+      FileUtils.mkdir_p(path_to_file)
       File.open(original, 'wb'){|f| f.write(response.body)}
     end
 
