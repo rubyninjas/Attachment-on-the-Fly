@@ -58,8 +58,9 @@ Paperclip::Attachment.class_eval do
       bucket  = self.s3_bucket
       key     = @new_file_name.gsub(/^#{root_path.to_s}\//, '')
       # another option to get a key here: File.join(File.dirname(self.path), File.basename(@new_file_name)).gsub(/^\//, '')
-      stream  = File.open(@new_file_name, 'rb')
-      bucket.objects[key].write(stream, :acl => :public_read)
+      File.open(@new_file_name, 'rb') do |stream|
+        bucket.object(key).put(body: stream)
+      end
     end
   end
 
